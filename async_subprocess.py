@@ -63,7 +63,7 @@ def threadedOutputQueue(pipe, queue, lock):
     finally:
         pipe.close()
 
-def threadedInputQueue(self, pipe, queue, lock):
+def threadedInputQueue(pipe, queue, lock):
     '''
     Called from the thread to update an input (stdin) queue.
     '''
