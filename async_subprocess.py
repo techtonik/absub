@@ -32,11 +32,11 @@ at the following URL: http://stackoverflow.com/questions/375427/
  Limitations
 -------------
 [ ] Popen arguments stdin/stdout/stderr can only be PIPE or None
-[ ] calling process.stdin.close() causes exception
+[x] calling process.stdin.close() causes exception
       IOError: close() called during concurrent operation on the same file object.
 '''
 
-__version__ = '0.3dev'
+__version__ = '0.3'
 
 from subprocess import PIPE, Popen
 from threading  import Thread, Lock
