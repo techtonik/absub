@@ -15,10 +15,14 @@ lines at once, that means test fails.
 
 longscript = """\
 import time
+import sys
 
 for x in range(5):
   print(x)
   time.sleep(1)
+  # flush() is important when output is redirected
+  # otherwise will be no output until buffer is full
+  sys.stdout.flush()
 """
 (fd, abspath) = tempfile.mkstemp('.async.py')
 os.write(fd, longscript)
@@ -41,7 +45,7 @@ while p.poll() is None:
   counter += 1
   out, err = p.communicate()
   if out:
-    print("Got '%s' on %dth iteration." % (out, counter))
+    print("Got '%s' on %dth iteration." % (out.strip(), counter))
 
 # there is no cleanup, because os.remove() fires up
 # faster than Python from Popen() gets to the script
