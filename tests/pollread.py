@@ -6,6 +6,10 @@ import sys
 import tempfile
 import time
 
+# add parent dir to module search path
+ABSUB = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ABSUB)
+
 print("""\
 The test should run for 5 seconds, showing
 one line per second. If you see all five
