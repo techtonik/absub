@@ -27,15 +27,59 @@ Provides an asynchronous wrapper around the subprocess module.
 
 The solution is inspired by snippet J. F. Sebastian posted at StackOverflow
 at the following URL: http://stackoverflow.com/questions/375427/
+
+-------------
+ Limitations
+-------------
+[ ] Popen arguments stdin/stdout/stderr can only be PIPE or None
+[ ] calling process.stdin.close() causes exception
+      IOError: close() called during concurrent operation on the same file object.
 '''
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 from subprocess import PIPE, Popen
 from threading  import Thread, Lock
 from warnings import warn
 
 from collections import deque
+
+# --- functions that run in separate threads ---
+def threadedOutputQueue(pipe, queue, lock):
+    '''
+    Called from the thread to update an output (stdout, stderr) queue.
+    '''
+    try:
+        while True:
+            chunk = pipe.readline()
+            if not chunk:
+                # hit end-of-file
+                break
+            lock.acquire()
+            queue.append(chunk)
+            lock.release()
+    except:
+        pass
+    finally:
+        pipe.close()
+
+def threadedInputQueue(self, pipe, queue, lock):
+    '''
+    Called from the thread to update an input (stdin) queue.
+    '''
+    try:
+        while True:
+            lock.acquire()
+            while len(queue) > 0:
+                chunk = queue.popleft()
+                pipe.write(chunk)
+            lock.release()
+            pipe.flush()
+    except:
+        pass
+    finally:
+        pipe.close()
+# --/ functions that run in separate threads ---
 
 class AsyncPopen(Popen):
     '''
@@ -102,7 +146,7 @@ class AsyncPopen(Popen):
             '''Queue of data read from stdout.'''
             self.stdout_lock = Lock()
             '''Lock used for stdout queue synchronization.'''
-            self.stdout_thread = Thread(target=self._ThreadedOutputQueue,
+            self.stdout_thread = Thread(target=threadedOutputQueue,
                                         args=(self.stdout, self.stdout_queue,
                                               self.stdout_lock))
             '''Queue management thread for stdout.'''
@@ -113,7 +157,7 @@ class AsyncPopen(Popen):
             '''Queue of data read from stderr.'''
             self.stderr_lock = Lock()
             '''Lock used for stderr queue synchronization.'''
-            self.stderr_thread = Thread(target=self._ThreadedOutputQueue,
+            self.stderr_thread = Thread(target=threadedOutputQueue,
                                         args=(self.stderr, self.stderr_queue,
                                               self.stderr_lock))
             '''Queue management thread for stderr.'''
@@ -124,48 +168,13 @@ class AsyncPopen(Popen):
             '''Queue of data to write to stdin.'''
             self.stdin_lock = Lock()
             '''Lock used for stdin queue synchronization.'''
-            self.stdin_thread = Thread(target=self._ThreadedInputQueue,
+            self.stdin_thread = Thread(target=threadedInputQueue,
                                         args=(self.stdin, self.stdin_queue,
                                               self.stdin_lock))
             '''Queue management thread for stdin.'''
             self.stdin_thread.daemon = True
             self.stdin_thread.start()
     
-    def _ThreadedOutputQueue(self, pipe, queue, lock):
-        '''
-        Called from the thread to update an output (stdout, stderr) queue.
-        '''
-        try:
-            while True:
-                chunk = pipe.readline()
-                if not chunk:
-                    # hit end-of-file
-                    break
-                lock.acquire()
-                queue.append(chunk)
-                lock.release()
-        except:
-            pass
-        finally:
-            pipe.close()
-    
-    def _ThreadedInputQueue(self, pipe, queue, lock):
-        '''
-        Called from the thread to update an input (stdin) queue.
-        '''
-        try:
-            while True:
-                lock.acquire()
-                while len(queue) > 0:
-                    chunk = queue.popleft()
-                    pipe.write(chunk)
-                lock.release()
-                pipe.flush()
-        except:
-            pass
-        finally:
-            pipe.close()
-
     def communicate(self, input=None):
         '''
         Interact with process: Enqueue data to be sent to stdin.  Return data
