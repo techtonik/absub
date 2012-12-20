@@ -26,6 +26,8 @@ This is based on a code snippet by J. F. Sebastian, posted at StackOverflow
 at the following URL: http://stackoverflow.com/questions/375427/
 '''
 
+__version__ = '0.2.2'
+
 from subprocess import PIPE, Popen
 from threading  import Thread, Lock
 from warnings import warn

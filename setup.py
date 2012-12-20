@@ -26,8 +26,20 @@ from distutils.core import setup
 long_description = "Cross-platform wrapper around subprocess.Popen to provide "
 long_description += "an asynchronous version of Popen.communicate()."
 
+
+def get_version(relpath):
+    """read version info from file without importing it"""
+    from os.path import dirname, join
+    for line in open(join(dirname(__file__), relpath)):
+        if '__version__' in line:
+            if '"' in line:
+                # __version__ = "0.9"
+                return line.split('"')[1]
+            elif "'" in line:
+                return line.split("'")[1]
+
 setup(name='async_subprocess',
-      version='0.2.1',
+      version=get_version('async_subprocess.py'),
       description="Asynchronous subprocess.Popen module",
       long_description=long_description,
       author="James Buchwald",
