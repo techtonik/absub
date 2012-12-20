@@ -46,7 +46,7 @@ counter = 0
 while p.poll() is None:
   time.sleep(0.001) # sleep to avoid 100% CPU load
   counter += 1
-  out, err = p.communicate()
+  out, err = p.asyncomm()
   if out:
     print("Got '%s' on %dth iteration." % (out.strip(), counter))
 
@@ -58,13 +58,13 @@ os.remove(abspath)
 
 # Missing tests:
 # [ ] p = AsyncPopen(cmd)
-#   [ ] communicate() with dead pipes returns (None, None)
+#   [ ] asyncomm() with dead pipes returns (None, None)
 # [ ] p = AsyncPopen(cmd, stdout=PIPE)
-#   [ ] communicate() with one dead pipe returns str, None
-#   [ ] communicate() with Python 3 returns ???, None
-#   [ ] communicate() with empty pipe returns '', None
-#   [ ] communicate() with closed pipe returns None, None
-#     [ ] figure out when communicate() can be called wuth closed pipe
+#   [ ] asyncomm() with one dead pipe returns str, None
+#   [ ] asyncomm() with Python 3 returns ???, None
+#   [ ] asyncomm() with empty pipe returns '', None
+#   [ ] asyncomm() with closed pipe returns None, None
+#     [ ] figure out when asyncomm() can be called wuth closed pipe
 # [ ] p = AsyncPopen(cmd, stdin=PIPE)
 #   [ ] try to guide some process
 # [ ] p = AsyncPopen(cmd, stdout=PIPE, stderr=PIPE)

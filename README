@@ -3,9 +3,9 @@ class.  You use it just like you would use subprocess.Popen; there are only
 two major differences:
 
     * You can only pass None or PIPE as values for stdout, stdin, stderr.
-    * communicate() returns immediately with whatever data is available, rather
+    * asyncomm() returns immediately with whatever data is available, rather
       than waiting for EOF and process termination.  As such, you can now call
-      communicate() many times on the same object.
+      asyncomm() many times on the same object.
 
 async_subprocess is beta software, so it might still be a bit buggy.  It has
 been tested on the following configurations:
@@ -19,12 +19,17 @@ Example usage:
     from async_subprocess import AsyncPopen, PIPE
     args = ("echo", "Hello World!")
     proc = AsyncPopen(args, stdout=PIPE)
-    stdoutdata, stderrdata = proc.communicate()
+    stdoutdata, stderrdata = proc.asyncomm()
     print stdoutdata    # should print "Hello World!"
 
 ------------
  What's New 
 ------------
+Version 0.4
+* (techtonik) Non-blocking communicate() is renamed to asyncomm() to allow
+  making AsyncPopen() class a drop-in Popen() replacement that doesn't break
+  existing codebase.
+
 Version 0.3
 * (techtonik) Change communicate() to return empty strings if pipes are
   alive and empty, and None if they are dead or closed.

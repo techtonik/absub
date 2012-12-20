@@ -36,7 +36,7 @@ at the following URL: http://stackoverflow.com/questions/375427/
       IOError: close() called during concurrent operation on the same file object.
 '''
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 from subprocess import PIPE, Popen
 from threading  import Thread, Lock
@@ -120,7 +120,7 @@ class AsyncPopen(Popen):
     
     Do not directly access AsyncPopen.stdout, AsyncPopen.stderr, or
     AsyncPopen.stdin.  Instead, use the (non-blocking asynchronous)
-    AsyncPopen.communicate() method.
+    AsyncPopen.asyncomm() method.
     
     This reads entire lines from stdout and stderr at once.
     
@@ -199,7 +199,7 @@ class AsyncPopen(Popen):
         if self._stdin:
             self.stdin = StdinQueue(self.stdin)
     
-    def communicate(self, input=None):
+    def asyncomm(self, input=None):
         '''
         Interact with process: Enqueue data to be sent to stdin.  Return data
         read from stdout and stderr as a tuple (stdoutdata, stderrdata).  Do
