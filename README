@@ -9,23 +9,27 @@ two major differences:
 
 async_subprocess is beta software, so it might still be a bit buggy.  It has
 been tested on the following configurations:
+
     * Linux (Fedora 15), Python 2.7.1
     * Linux (Fedora 15), Python 3.2
-It should also work on Windows, but this has not been tested yet.
+    * Windows Vista 32, Python 2.7.3
 
 Example usage:
 
-from async_subprocess import AsyncPopen, PIPE
-args = ("echo", "Hello World!")
-proc = AsyncPopen(args, stdout=PIPE)
-stdoutdata, stderrdata = proc.communicate()
-print stdoutdata    # should print "Hello World!"
+    from async_subprocess import AsyncPopen, PIPE
+    args = ("echo", "Hello World!")
+    proc = AsyncPopen(args, stdout=PIPE)
+    stdoutdata, stderrdata = proc.communicate()
+    print stdoutdata    # should print "Hello World!"
 
+------------
+ What's New 
+------------
+Version 0.2.3
+* (techtonik) Fixed wrong lock being set in communicate() for stdout pipe.
+* (techtonik) Added tests.
 
-----------------------------
- What's New in Version 0.2?
-----------------------------
-
+Version 0.2
 * Got rid of the stray debug print statement that was accidentally left in
   version 0.1.  Sorry about that, it's gone now, and 0.2 has been checked for
   other stray debug statements.
