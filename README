@@ -25,6 +25,9 @@ Example usage:
 ------------
  What's New 
 ------------
+Version 0.5
+* (techtonik) Implement standard communicate() using non-blocking layer.
+
 Version 0.4
 * (techtonik) Non-blocking communicate() is renamed to asyncomm() to allow
   making AsyncPopen() class a drop-in Popen() replacement that doesn't break

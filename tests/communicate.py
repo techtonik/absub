@@ -42,7 +42,7 @@ cmd = [python, abspath]
 
 # Popen returns immediately leaving child process
 # executed in background
-if 1:
+if 0:
     from subprocess import Popen, PIPE
     p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 else:
@@ -54,6 +54,7 @@ assert p.returncode != None
 
 #print repr(stdout), repr(stderr)
 # split helps avoid line end differences when comparing
+print repr(stdout.split()), repr(stderr)
 assert stdout.split() == ['stdout', 'stuff', "''"]
 assert stderr.split() == ['stderr', 'stuff']
 
@@ -68,3 +69,4 @@ os.remove(abspath)
 # [ ] p = AsyncPopen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 #   [ ] stdout lineends on different platforms after communicate
 #     [x] always \r\n on Windows for the script above
+#   [ ] stdout return type on Python 3

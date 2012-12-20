@@ -36,13 +36,20 @@ at the following URL: http://stackoverflow.com/questions/375427/
       IOError: close() called during concurrent operation on the same file object.
 '''
 
-__version__ = '0.4'
+__version__ = '0.5dev'
 
 from subprocess import PIPE, Popen
 from threading  import Thread, Lock
 from warnings import warn
 
 from collections import deque
+
+# --- debugging helper ---
+
+def echo(msg):
+  import sys
+  sys.stderr.write(msg)
+  sys.stderr.flush()
 
 # --- functions that run in separate threads ---
 def threadedOutputQueue(pipe, queue, lock):
@@ -198,6 +205,27 @@ class AsyncPopen(Popen):
             self.stderr_thread.start()
         if self._stdin:
             self.stdin = StdinQueue(self.stdin)
+
+    def communicate(self, input=None):
+        if self._stdin:
+            if input:
+                self.stdin.write(input)
+            # close stdin pipe for the children process. If
+            # it is blocked waiting for input, this will make
+            # it receive EOF to unblock.
+            self.stdin.close()
+
+        stdoutdata = b'' if self._stdout else None
+        stderrdata = b'' if self._stderr else None
+        while self.poll() == None:
+            # [ ] this causes 100% CPU load
+            (out, err) = self.asyncomm()
+            if out:
+                stdoutdata += out
+            if err:
+                stderrdata += err
+
+        return (stdoutdata, stderrdata)
     
     def asyncomm(self, input=None):
         '''
