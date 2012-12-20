@@ -73,8 +73,8 @@ def threadedInputQueue(pipe, queue, lock):
             while len(queue) > 0:
                 chunk = queue.popleft()
                 pipe.write(chunk)
-            lock.release()
             pipe.flush()
+            lock.release()
     except:
         pass
     finally:
