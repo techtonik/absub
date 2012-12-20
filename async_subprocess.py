@@ -224,6 +224,17 @@ class AsyncPopen(Popen):
                 stdoutdata += out
             if err:
                 stderrdata += err
+        # wait until threads terminate to empty queues
+        if self._stdout:
+            self.stdout_thread.join()
+        if self._stderr:
+            self.stderr_thread.join()
+        # read out everything
+        (out, err) = self.asyncomm()
+        if out:
+            stdoutdata += out
+        if err:
+            stderrdata += err
 
         return (stdoutdata, stderrdata)
     
