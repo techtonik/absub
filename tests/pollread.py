@@ -50,9 +50,6 @@ while p.poll() is None:
   if out:
     print("Got '%s' on %dth iteration." % (out.strip(), counter))
 
-# there is no cleanup, because os.remove() fires up
-# faster than Python from Popen() gets to the script
-# file
 os.remove(abspath)
 
 
