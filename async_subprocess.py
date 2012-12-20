@@ -1,5 +1,8 @@
 # Cross-platform asynchronous version of subprocess.Popen
-# Copyright (c) 2011 James Buchwald
+#
+# Copyright (c) 2011-2012
+# James Buchwald
+# anatoly techtonik
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +25,7 @@
 '''
 Provides an asynchronous wrapper around the subprocess module.
 
-This is based on a code snippet by J. F. Sebastian, posted at StackOverflow
+The solution is inspired by snippet J. F. Sebastian posted at StackOverflow
 at the following URL: http://stackoverflow.com/questions/375427/
 '''
 
@@ -44,7 +47,7 @@ class AsyncPopen(Popen):
     
     This reads entire lines from stdout and stderr at once.
     
-    Based on a code snippet by J. F. Sebastian, found at the following URL: 
+    Inspired by snippet of J. F. Sebastian, found at the following URL: 
         http://stackoverflow.com/questions/375427/
     '''
     def __init__(self, args, bufsize=0, executable=None,
