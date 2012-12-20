@@ -25,6 +25,10 @@ Example usage:
 ------------
  What's New 
 ------------
+Version 0.3
+* (techtonik) Wrap Popen.stdin to make sure that programs closing stdin
+  directly do this in a threadsafe manner.
+
 Version 0.2.3
 * (techtonik) Fixed wrong lock being set in communicate() for stdout pipe.
 * (techtonik) Added tests.

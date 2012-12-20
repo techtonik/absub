@@ -36,7 +36,7 @@ at the following URL: http://stackoverflow.com/questions/375427/
       IOError: close() called during concurrent operation on the same file object.
 '''
 
-__version__ = '0.2.3'
+__version__ = '0.3dev'
 
 from subprocess import PIPE, Popen
 from threading  import Thread, Lock
@@ -80,6 +80,39 @@ def threadedInputQueue(pipe, queue, lock):
     finally:
         pipe.close()
 # --/ functions that run in separate threads ---
+
+class StdinQueue(object):
+    '''
+    Spin off queue managenent thread for stdin and
+    wrap common stdin file methods to be thread safe.
+    
+    [ ] find out which methods are not thread safe
+    '''
+    def __init__(self, stdin):
+        self.stdin = stdin
+        '''Queue of data to write to stdin.'''
+        self._queue = deque()
+        '''Lock used for stdin queue synchronization.'''
+        self._lock = Lock()
+        '''Queue management thread for stdin.'''
+        self._thread = Thread(target=threadedInputQueue,
+                                args=(self.stdin, self._queue, self._lock))
+        self._thread.daemon = True
+        self._thread.start()
+
+    def write(self, data):
+        if data:
+            # enqueue data
+            self._lock.acquire()
+            self._queue.append(data)
+            self._lock.release()
+    
+    def close(self):
+        # threads are stopped when their pipes are closed
+        self._lock.acquire()
+        self.stdin.close()
+        self._lock.release()
+
 
 class AsyncPopen(Popen):
     '''
@@ -164,16 +197,7 @@ class AsyncPopen(Popen):
             self.stderr_thread.daemon = True
             self.stderr_thread.start()
         if self._stdin:
-            self.stdin_queue = deque()
-            '''Queue of data to write to stdin.'''
-            self.stdin_lock = Lock()
-            '''Lock used for stdin queue synchronization.'''
-            self.stdin_thread = Thread(target=threadedInputQueue,
-                                        args=(self.stdin, self.stdin_queue,
-                                              self.stdin_lock))
-            '''Queue management thread for stdin.'''
-            self.stdin_thread.daemon = True
-            self.stdin_thread.start()
+            self.stdin = StdinQueue(self.stdin)
     
     def communicate(self, input=None):
         '''
@@ -182,10 +206,7 @@ class AsyncPopen(Popen):
         NOT wait for process to terminate.
         '''
         if self._stdin and input:
-            # enqueue data
-            self.stdin_lock.acquire()
-            self.stdin_queue.append(input)
-            self.stdin_lock.release()
+            self.stdin.write(input)
         
         stdoutdata = None
         stderrdata = None
