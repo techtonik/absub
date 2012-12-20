@@ -63,27 +63,29 @@ class AsyncPopen(Popen):
         the "bytes" built-in type; it is up to the user to convert this type
         to the appropriate character type, if desired.
         '''
+        self._stdin = None
+        self._stdout = None
+        self._stderr = None
         # Check for use of stdin, stdout, stderr values other than NONE, PIPE
-        if stdin != None and stdin != PIPE:
+        if stdin not in (None, PIPE):
             warn("stdin must be either None or subprocess.PIPE.")
-            _stdin = None
         else:
-            _stdin = stdin
-        if stdout != None and stdout != PIPE:
+            self._stdin = stdin
+        if stdout not in (None, PIPE):
             warn("stdout must be either None or subprocess.PIPE.")
-            _stdout = None
         else:
-            _stdout = stdout
-        if stderr != None and stderr != PIPE:
+            self._stdout = stdout
+        if stderr not in (None, PIPE):
             warn("stderr must be either None or subprocess.PIPE.")
-            _stderr = None
         else:
-            _stderr = stderr
+            self._stderr = stderr
         
         # Inherit base class behavior.
         super(AsyncPopen, self).__init__(args, bufsize=bufsize,
-                                         executable=executable, stdin=_stdin,
-                                         stdout=_stdout, stderr=_stderr,
+                                         executable=executable,
+                                         stdin=self._stdin,
+                                         stdout=self._stdout,
+                                         stderr=self._stderr,
                                          preexec_fn=preexec_fn,
                                          close_fds=close_fds,
                                          shell=shell, cwd=cwd, env=env,
@@ -92,14 +94,7 @@ class AsyncPopen(Popen):
                                          creationflags=creationflags)
         
         # Start the I/O polling threads.
-        self.use_stdout = False
-        '''Flag to use stdout.'''
-        self.use_stderr = False
-        '''Flag to use stderr.'''
-        self.use_stdin = False
-        '''Flag to use stdin.'''
-        if _stdout == PIPE:
-            self.use_stdout = True
+        if self._stdout:
             self.stdout_queue = deque()
             '''Queue of data read from stdout.'''
             self.stdout_lock = Lock()
@@ -110,8 +105,7 @@ class AsyncPopen(Popen):
             '''Queue management thread for stdout.'''
             self.stdout_thread.daemon = True
             self.stdout_thread.start()
-        if _stderr == PIPE:
-            self.use_stderr = True
+        if self._stderr:
             self.stderr_queue = deque()
             '''Queue of data read from stderr.'''
             self.stderr_lock = Lock()
@@ -122,8 +116,7 @@ class AsyncPopen(Popen):
             '''Queue management thread for stderr.'''
             self.stderr_thread.daemon = True
             self.stderr_thread.start()
-        if _stdin == PIPE:
-            self.use_stdin = True
+        if self._stdin:
             self.stdin_queue = deque()
             '''Queue of data to write to stdin.'''
             self.stdin_lock = Lock()
@@ -176,7 +169,7 @@ class AsyncPopen(Popen):
         read from stdout and stderr as a tuple (stdoutdata, stderrdata).  Do
         NOT wait for process to terminate.
         '''
-        if self.use_stdin and input:
+        if self._stdin and input:
             # enqueue data
             self.stdin_lock.acquire()
             self.stdin_queue.append(input)
@@ -184,7 +177,7 @@ class AsyncPopen(Popen):
         
         stdoutdata = None
         stderrdata = None
-        if self.use_stdout:
+        if self._stdout:
             # get data
             data = b""
             self.stdout_lock.acquire()
@@ -197,7 +190,7 @@ class AsyncPopen(Popen):
             self.stdout_lock.release()
             if data: stdoutdata = data
 
-        if self.use_stderr:
+        if self._stderr:
             # get data
             data = b""
             self.stderr_lock.acquire()
