@@ -26,6 +26,8 @@ Example usage:
  What's New 
 ------------
 Version 0.3
+* (techtonik) Change communicate() to return empty strings if pipes are
+  alive and empty, and None if they are dead or closed.
 * (techtonik) Wrap Popen.stdin to make sure that programs closing stdin
   directly do this in a threadsafe manner.
 

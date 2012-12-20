@@ -212,7 +212,7 @@ class AsyncPopen(Popen):
         stderrdata = None
         if self._stdout:
             # get data
-            data = b""
+            data = b""   # ([ ] check b'' in pre-Python 2.7)
             self.stdout_lock.acquire()
             try:
                 while len(self.stdout_queue) > 0:
@@ -221,11 +221,12 @@ class AsyncPopen(Popen):
                 self.stdout_lock.release()
                 raise
             self.stdout_lock.release()
-            if data: stdoutdata = data
+            # [ ] detect closed pipe to return None
+            stdoutdata = data
 
         if self._stderr:
             # get data
-            data = b""
+            data = b""   # ([ ] check b'' in pre-Python 2.7)
             self.stderr_lock.acquire()
             try:
                 while len(self.stderr_queue) > 0:
@@ -234,6 +235,7 @@ class AsyncPopen(Popen):
                 self.stderr_lock.release()
                 raise
             self.stderr_lock.release()
-            if data: stderrdata = data
+            # [ ] detect closed pipe to return None
+            stderrdata = data
         
         return (stdoutdata, stderrdata)
