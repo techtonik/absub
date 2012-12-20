@@ -167,7 +167,7 @@ class AsyncPopen(Popen):
             pass
         finally:
             pipe.close()
-    
+
     def communicate(self, input=None):
         '''
         Interact with process: Enqueue data to be sent to stdin.  Return data
@@ -185,14 +185,14 @@ class AsyncPopen(Popen):
         if self.use_stdout:
             # get data
             data = b""
-            self.stderr_lock.acquire()
+            self.stdout_lock.acquire()
             try:
                 while len(self.stdout_queue) > 0:
                     data += self.stdout_queue.popleft()
             except:
-                self.stderr_lock.release()
+                self.stdout_lock.release()
                 raise
-            self.stderr_lock.release()
+            self.stdout_lock.release()
             if data: stdoutdata = data
 
         if self.use_stderr:
